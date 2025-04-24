@@ -12,8 +12,9 @@ pipeline {
             steps {
                 script {
                     def prStatus = sh(script: '''
-                        curl -H "Authorization: token YOUR_GITHUB_TOKEN" \
-                        https://api.github.com/repos/your_username/your_repo/pulls/${env.CHANGE_ID} | \
+                        curl -H "Authorization: token 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
+" \
+                        https://api.github.com/repos/Prez77/Jenkins-multibranch-pipeline-project/pulls/${env.CHANGE_ID} | \
                         jq -r '.state'
                     ''', returnStdout: true).trim()
 
