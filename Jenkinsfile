@@ -1,12 +1,31 @@
 pipeline {
     agent any
-    environment {
-        BRANCH_NAME = "${env.BRANCH_NAME}"
-    }
+
     stages {
-        stage('Run Deployment Script') {
+        stage('Checkout') {
             steps {
-                echo "Triggered by merge to branch: ${env.BRANCH_NAME}"
+                checkout scm
+            }
+        }
+
+        stage('PR Approval Check') {
+            steps {
+                script {
+                    def prStatus = sh(script: '''
+                        curl -H "Authorization: token YOUR_GITHUB_TOKEN" \
+                        https://api.github.com/repos/your_username/your_repo/pulls/${env.CHANGE_ID} | \
+                        jq -r '.state'
+                    ''', returnStdout: true).trim()
+
+                    if (prStatus != 'closed') {
+                        error "Pull request is not approved/merged yet!"
+                    }
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
                 sh './deploy.sh'
             }
         }
